@@ -1,4 +1,5 @@
-import librosa
+from librosa.output import write_wav
+from librosa import load, get_duration
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -14,8 +15,8 @@ def audio_files_to_numpy(audio_dir, list_audio_files, sample_rate, frame_length,
 
     for file in list_audio_files:
         # open the audio file
-        y, sr = librosa.load(os.path.join(audio_dir, file), sr=sample_rate)
-        total_duration = librosa.get_duration(y=y, sr=sr)
+        y, sr = load(os.path.join(audio_dir, file), sr=sample_rate)
+        total_duration = get_duration(y=y, sr=sr)
 
         if (total_duration >= min_duration):
             list_sound_array.append(
@@ -56,6 +57,12 @@ def audio_to_audio_frame_stack(sound_data, frame_length, hop_length_frame):
     return sound_data_array
 
 
+def save_audio(y, sample_rate, output_name='audio_ouput.wav'):
+    '''
+    Save audio file given y (amplitude values) and sample_rate.
+    By default, output name is 'audio_output.wav'
+    '''
+    write_wav(output_name, y_mixed - y_noise, sample_rate)
 
 
 
@@ -63,13 +70,7 @@ def audio_to_audio_frame_stack(sound_data, frame_length, hop_length_frame):
 
 
 
-
-
-
-
-
-
-audio_dir = 'spectrogramVisualizing/good'
+audio_dir = 'spectrogramVisualizing/medium'
 clean = 'clean.wav'
 mixed = 'mixed.wav'
 noise = 'noise.wav'
@@ -78,13 +79,16 @@ frame_length = sample_rate + 64  # a bit more than sample_rate for avoiding over
 min_duration = 1  # Seconds
 hop_length_frame = sample_rate + 64
 
-y_clean, sr_clean = librosa.load(os.path.join(audio_dir, clean), sr=sample_rate)
-y_mixed, sr_mixed = librosa.load(os.path.join(audio_dir, mixed), sr=sample_rate)
-y_noise, sr_noise = librosa.load(os.path.join(audio_dir, noise), sr=sample_rate)
+y_clean, sr_clean = load(os.path.join(audio_dir, clean), sr=sample_rate)
+y_mixed, sr_mixed = load(os.path.join(audio_dir, mixed), sr=sample_rate)
+y_noise, sr_noise = load(os.path.join(audio_dir, noise), sr=sample_rate)
+
+save_audio(y_clean, sample_rate, 'mispe.wav')
+
 # Total duration = y/sr
-total_duration_clean = librosa.get_duration(y=y_clean, sr=sr_clean)
-total_duration_mixed = librosa.get_duration(y=y_mixed, sr=sr_mixed)
-total_duration_noise = librosa.get_duration(y=y_noise, sr=sr_noise)
+total_duration_clean = get_duration(y=y_clean, sr=sr_clean)
+total_duration_mixed = get_duration(y=y_mixed, sr=sr_mixed)
+total_duration_noise = get_duration(y=y_noise, sr=sr_noise)
 print("Duration clean: {} seconds.".format(total_duration_clean))
 print("Duration mixed: {} seconds.".format(total_duration_mixed))
 print("Duration noise: {} seconds.".format(total_duration_noise))
@@ -93,14 +97,13 @@ fig, axs = plt.subplots(4, sharex=True, sharey=True, gridspec_kw={'hspace': 0})
 fig.suptitle('Time series')
 axs[0].plot(y_clean)
 axs[0].set_title('Clean voice', loc='right')
-
 axs[1].plot(y_mixed)
 axs[1].set_title('Mixed voice', loc='right')
 axs[2].plot(y_noise)
 axs[2].set_title('Noise', loc='right')
 axs[3].plot(y_mixed - y_noise)
 axs[3].set_title('Mixed voice - Noise = Clean voice', loc='right')
-
 plt.show()
+
 
 audio_files_to_numpy(audio_dir, [clean, mixed, noise], sample_rate, frame_length, hop_length_frame, min_duration)
