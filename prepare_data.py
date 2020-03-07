@@ -28,11 +28,12 @@ min_duration, frame_length, hop_length_frame, hop_length_frame_noise, nb_samples
 
     nb_voice_files = len(list_voice_files)
     nb_noise_files = len(list_noise_files)
-
+    print("Number of voice files: {}".format(nb_voice_files))
+    print("Number of noise files: {}".format(nb_noise_files))
 
     # Extracting noise and voice from folder and convert to numpy
     noise = audio_files_to_numpy(noise_dir, list_noise_files, sample_rate,
-                                     frame_length, hop_length_frame_noise, min_duration)
+                                frame_length, hop_length_frame_noise, min_duration)
 
     voice = audio_files_to_numpy(voice_dir, list_voice_files,
                                      sample_rate, frame_length, hop_length_frame, min_duration)

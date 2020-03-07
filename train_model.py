@@ -8,7 +8,7 @@ from data_tools import scaled_in, scaled_ou
 
 def training(path_save_spectrogram, weights_path, name_model, training_from_scratch, epochs, batch_size):
     """ This function will read noisy voice and clean voice spectrograms created by data_creation mode,
-    and train a Unet model on this dataset for epochs and batch_size specified. It saves best models to disk regularly
+    and train a Unet model on this dataset for epochs and batch_size specified. It saves best models to disk regularly.
     If training_from_scratch is set to True it will train from scratch, if set to False, it will train
     from weights (name_model) provided in weights_path
     """

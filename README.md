@@ -5,6 +5,12 @@
 >
 >Published in towards data science : [Speech-enhancement with Deep learning](https://towardsdatascience.com/speech-enhancement-with-deep-learning-36a1991d3d8d)
 >
+
+
+## STEPS FOLLOWED BY ME (@betegon)
+1. `conda create -n SpeechEnhancement` # this will create a python 3.7.4 environment
+2. `pip install -r requirements.txt`
+3. modify the file to denoise in args.py
 ## Introduction
 **This project aims at building a speech enhancement system to attenuate environmental noise.**
 
