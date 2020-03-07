@@ -92,9 +92,15 @@ print("Duration noise: {} seconds.".format(total_duration_noise))
 fig, axs = plt.subplots(4, sharex=True, sharey=True, gridspec_kw={'hspace': 0})
 fig.suptitle('Time series')
 axs[0].plot(y_clean)
+axs[0].set_title('Clean voice', loc='right')
+
 axs[1].plot(y_mixed)
+axs[1].set_title('Mixed voice', loc='right')
 axs[2].plot(y_noise)
+axs[2].set_title('Noise', loc='right')
 axs[3].plot(y_mixed - y_noise)
+axs[3].set_title('Mixed voice - Noise = Clean voice', loc='right')
+
 plt.show()
 
 audio_files_to_numpy(audio_dir, [clean, mixed, noise], sample_rate, frame_length, hop_length_frame, min_duration)
