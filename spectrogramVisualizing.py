@@ -42,10 +42,8 @@ def audio_files_to_numpy(audio_dir, list_audio_files, sample_rate, frame_length,
         return
 
 
-
-
 def audio_to_audio_frame_stack(sound_data, frame_length, hop_length_frame):
-    """This function take an audio and split into several frame
+    """This function take an audio and split into several frames
        in a numpy matrix of size (nb_frame,frame_length)"""
 
     sequence_sample_length = sound_data.shape[0]
@@ -65,9 +63,19 @@ def save_audio(y, sample_rate, output_name='audio_ouput.wav'):
     write_wav(output_name, y_mixed - y_noise, sample_rate)
 
 
+def plot_time_series(time_series_list, time_series_titles):
+    '''Plot a list of time series in different subfigures.
+    args:
+      time_series_list:   List of time_series to plot
+      time_series_titles: list of strings containing titles of subplots
+    '''
 
-
-
+    fig, axs = plt.subplots(len(time_series_list), sharex=True, sharey=True, gridspec_kw={'hspace': 0})
+    for idx, time_serie in enumerate(time_series_list):
+        fig.suptitle('Time series')
+        axs[idx].plot(time_serie)
+        axs[idx].set_title(time_series_titles[idx], loc='right')
+    plt.show()
 
 
 audio_dir = 'spectrogramVisualizing/medium'
@@ -93,17 +101,9 @@ print("Duration clean: {} seconds.".format(total_duration_clean))
 print("Duration mixed: {} seconds.".format(total_duration_mixed))
 print("Duration noise: {} seconds.".format(total_duration_noise))
 
-fig, axs = plt.subplots(4, sharex=True, sharey=True, gridspec_kw={'hspace': 0})
-fig.suptitle('Time series')
-axs[0].plot(y_clean)
-axs[0].set_title('Clean voice', loc='right')
-axs[1].plot(y_mixed)
-axs[1].set_title('Mixed voice', loc='right')
-axs[2].plot(y_noise)
-axs[2].set_title('Noise', loc='right')
-axs[3].plot(y_mixed - y_noise)
-axs[3].set_title('Mixed voice - Noise = Clean voice', loc='right')
-plt.show()
+time_series = [y_clean, y_mixed, y_noise, y_mixed - y_noise]
+titles = ['Clean voice', 'Mixed voice', 'Noise', 'Mixed voice - Noise = Clean voice']
+plot_time_series(time_series, titles)
 
 
 audio_files_to_numpy(audio_dir, [clean, mixed, noise], sample_rate, frame_length, hop_length_frame, min_duration)
