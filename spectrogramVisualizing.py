@@ -15,7 +15,15 @@ import os
 def audio_files_to_numpy(audio_dir, list_audio_files, sample_rate, frame_length, hop_length_frame, min_duration):
     """This function take audio files of a directory and merge them
     in a numpy matrix of size (nb_frame,frame_length)
-    for a sliding window of size hop_length_frame"""
+    for a sliding window of size hop_length_frame
+
+    args:
+        audio_dir (str): Directory where audios are located
+        list_audio_files (list): string list of names of audio files.
+        sample_rate (int): Sample rate of audios.
+        frame_length (int): Length of frames.
+        min_duration (int): Mininum duration of the audios to be added.
+    """
 
     list_sound_array = []
     list_audio_below_min_duration = []
@@ -62,7 +70,7 @@ def audio_to_audio_frame_stack(sound_data, frame_length, hop_length_frame, inclu
         hop_length_frame (int): Sliding window.
         include_if_bigger_than (float): Value between 0 and 1. Default to 0.2. Include last window (that will be padded) if it is greater than a percentage of the sliding window.
 
-       note: to match window size (i.e hop_length_frame), it applies a zero padding.
+    note: to match window size (i.e hop_length_frame), it applies a zero padding.
 
     """
 
@@ -105,17 +113,17 @@ def plot_time_series(time_series_list, time_series_titles):
 
 
 audio_dir = 'spectrogramVisualizing/medium'
-clean = 'clean.wav'
-mixed = 'mixed.wav'
-noise = 'noise.wav'
+clean_filename = 'clean.wav'
+mixed_filename = 'mixed.wav'
+noise_filename = 'noise.wav'
 sample_rate = 16000  # Hz
 frame_length = sample_rate + 64  # a bit more than sample_rate for avoiding overlapping.
 min_duration = 1  # Seconds
 hop_length_frame = sample_rate + 64
 
-y_clean, sr_clean = load(os.path.join(audio_dir, clean), sr=sample_rate)
-y_mixed, sr_mixed = load(os.path.join(audio_dir, mixed), sr=sample_rate)
-y_noise, sr_noise = load(os.path.join(audio_dir, noise), sr=sample_rate)
+y_clean, sr_clean = load(os.path.join(audio_dir, clean_filename), sr=sample_rate)
+y_mixed, sr_mixed = load(os.path.join(audio_dir, mixed_filename), sr=sample_rate)
+y_noise, sr_noise = load(os.path.join(audio_dir, noise_filename), sr=sample_rate)
 
 # Total duration = y/sr
 total_duration_clean = get_duration(y=y_clean, sr=sr_clean)
@@ -142,7 +150,7 @@ plot_time_series(time_series, titles)
 '''
 
 # 1. Audio files to numpy
-audio_files_to_numpy(audio_dir, [clean, mixed, noise], sample_rate, frame_length, hop_length_frame, min_duration)
+audio_files_to_numpy(audio_dir, [clean_filename, mixed_filename, noise_filename], sample_rate, frame_length, hop_length_frame, min_duration)
 
 # 1.2 Audio to audio frame stack
 list_sound_array = []
