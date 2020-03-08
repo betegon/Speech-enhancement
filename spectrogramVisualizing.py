@@ -69,7 +69,8 @@ def plot_time_series(time_series_list, time_series_titles):
       time_series_list:   List of time_series to plot
       time_series_titles: list of strings containing titles of subplots
     '''
-
+    if (len(time_series_list) != len(time_series_titles)):
+        raise Exception("time_series_list and time_series_titles should have the same lenght. There should be a title for each time serie.")
     fig, axs = plt.subplots(len(time_series_list), sharex=True, sharey=True, gridspec_kw={'hspace': 0})
     for idx, time_serie in enumerate(time_series_list):
         fig.suptitle('Time series')
