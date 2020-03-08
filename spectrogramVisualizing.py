@@ -57,36 +57,27 @@ def audio_to_audio_frame_stack(sound_data, frame_length, hop_length_frame, inclu
        in a numpy matrix of size (nb_frame,frame_length)
 
     args:
+        sound_data (list): List of amplitudes returned from librosa.load().
+        frame_length (int): Length of frames.
         hop_length_frame (int): Sliding window.
         include_if_bigger_than (float): Value between 0 and 1. Default to 0.2. Include last window (that will be padded) if it is greater than a percentage of the sliding window.
 
        note: to match window size (i.e hop_length_frame), it applies a zero padding.
 
     """
-    # sequence_sample_length = sound_data.shape[0]
-    # sound_data_list = [sound_data[start:(start + frame_length)] for start in range(0, sequence_sample_length - frame_length + 1, hop_length_frame)]  # get sliding windows
-    # sound_data_array = np.vstack(sound_data_list)
-    # return sound_data_array
 
-    time_series_length = sound_data.shape[0]
     sound_data_list = []
+    time_series_length = sound_data.shape[0]
     for start in range(0, time_series_length, hop_length_frame):
         frame = sound_data[start:(start + frame_length)]
         if(frame.shape[0] == hop_length_frame):
             sound_data_list.append(frame)
-        elif(frame.shape[0] < hop_length_frame and
-                frame.shape[0] > (include_if_bigger_than * hop_length_frame)):
+        elif(frame.shape[0] < hop_length_frame and frame.shape[0] > (include_if_bigger_than * hop_length_frame)):
             # if it is the last element, add zero padding to match hop_length_frame
-            print(frame.shape)
             frame = np.pad(frame, (0, hop_length_frame-frame.shape[0]), 'constant')
-            print("longitud de frame despues del padding")
-            print(frame)
+            sound_data_list.append(frame)
 
-        print(type(frame))
-        print(frame.shape)
-
-    sound_data_array = np.vstack(sound_data_list)
-    print(sound_data_array.shape)
+    return np.vstack(sound_data_list)
 
 
 def save_audio(y, sample_rate, output_name='audio_ouput.wav'):
@@ -160,7 +151,7 @@ print("\ny_clean \nappending.\n")
 print(y_clean)
 print(appending)
 print(y_clean.shape)
-if appending:
+if appending.any():
     print(appending.shape)
 # 1.3 Append result from 1.2 to list_sound_array
 list_sound_array.append(appending)
