@@ -14,7 +14,9 @@ parser.add_argument('--path_save_spectrogram', default='/home/betegon/Desktop/DE
 parser.add_argument('--path_save_time_serie', default='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/time_serie', type=str)
 
 parser.add_argument('--path_save_sound', default='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/sound', type=str)
-#How much frame to create in data_creation mode
+# How many frames to create in data_creation mode.
+# Each window (will be converted to 2D spectrogram) and will be a sample for training.
+# nb_samples is simply the number of windows used.
 parser.add_argument('--nb_samples', default=1, type=int)
 #Training from scratch or pre-trained weights
 parser.add_argument('--training_from_scratch',default=True, type=bool)
