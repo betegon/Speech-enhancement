@@ -3,10 +3,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+
 # TODO: Document That I have used zero padding for STFT
 # TODO: Change values in args.py to get 16064Hz as frame rate  and all the other parameters.
 # TODO: Rename audio_to_audio_frame_stack() to time_series_to_frame_stack()
 # TODO: Substitute the old functions by the ones here.
+# TODO: Start training from the weights provided in the repo.
+# TODO: Padding noise with something different than zeros
+#       (maybe with frames from earlier in the same noise audio).
+#       So when the speakers stops talking, the noise persists.
+# TODO: Think of a way to produce more samples by mixing noises or something.
+#       Maybe increasing its amplitude. Check blend_noise_randomly()
 # TODO: Handle different encoding types of audio + channels (2 vs 1 channel).
 #       Best way is maybe convert from 2 to 1 channel.
 
@@ -53,11 +60,6 @@ def audio_files_to_numpy(audio_dir, list_audio_files, sample_rate, frame_length,
             print("  {}".format(audio_below_duration))
 
     if list_sound_array:
-        print("Lista de arrays: \n\n")
-        print(list_sound_array[0].shape)
-        print("\n\n\n\nLista de arrays ESTAKADA: \n\n")
-        stacked = np.vstack(list_sound_array)
-        print(type(stacked))
         return np.vstack(list_sound_array)
     else:
         print("There aren't any files above minimum duration ({} seconds).".format(min_duration))
@@ -96,8 +98,11 @@ def save_audio(y, sample_rate, output_name='audio_ouput.wav'):
     '''
     Save audio file given y (amplitude values) and sample_rate.
     By default, output name is 'audio_output.wav'
+
+    Args:
+        y (ndarray): shape should be (n,) or (2,n).
     '''
-    librosa.output.write_wav(output_name, y_mixed - y_noise, sample_rate)
+    librosa.output.write_wav(output_name, y, sample_rate)
 
 
 def plot_time_series(time_series_list, time_series_titles):
@@ -116,81 +121,64 @@ def plot_time_series(time_series_list, time_series_titles):
     plt.show()
 
 
-audio_dir = 'spectrogramVisualizing/medium'
-clean_filename = 'clean.wav'
-mixed_filename = 'mixed.wav'
-noise_filename = 'noise.wav'
-sample_rate = 16000  # Hz
-frame_length = sample_rate + 64  # a bit more than sample_rate for avoiding overlapping.
-min_duration = 1  # Seconds
-hop_length_frame = sample_rate + 64
+def main():
+    audio_dir = 'spectrogramVisualizing/medium'
+    clean_filename = 'clean.wav'
+    mixed_filename = 'mixed.wav'
+    noise_filename = 'noise.wav'
+    sample_rate = 16000  # Hz
+    frame_length = sample_rate + 64  # a bit more than sample_rate for avoiding overlapping.
+    min_duration = 1  # Seconds
+    hop_length_frame = sample_rate + 64
 
-y_clean, sr_clean = librosa.load(os.path.join(audio_dir, clean_filename), sr=sample_rate)
-y_mixed, sr_mixed = librosa.load(os.path.join(audio_dir, mixed_filename), sr=sample_rate)
-y_noise, sr_noise = librosa.load(os.path.join(audio_dir, noise_filename), sr=sample_rate)
+    # Load .wav files to plot
+    y_clean, sr_clean = librosa.load(os.path.join(audio_dir, clean_filename), sr=sample_rate)
+    y_mixed, sr_mixed = librosa.load(os.path.join(audio_dir, mixed_filename), sr=sample_rate)
+    y_noise, sr_noise = librosa.load(os.path.join(audio_dir, noise_filename), sr=sample_rate)
 
-# Total duration = y/sr
-total_duration_clean = librosa.get_duration(y=y_clean, sr=sr_clean)
-total_duration_mixed = librosa.get_duration(y=y_mixed, sr=sr_mixed)
-total_duration_noise = librosa.get_duration(y=y_noise, sr=sr_noise)
-print("Duration clean: {} seconds.".format(total_duration_clean))
-print("Duration mixed: {} seconds.".format(total_duration_mixed))
-print("Duration noise: {} seconds.".format(total_duration_noise))
+    # Total duration = y/sr
+    print("Duration clean: {} seconds.".format(librosa.get_duration(y=y_clean, sr=sr_clean)))
+    print("Duration mixed: {} seconds.".format(librosa.get_duration(y=y_mixed, sr=sr_mixed)))
+    print("Duration noise: {} seconds.".format(librosa.get_duration(y=y_noise, sr=sr_noise)))
 
-# PLOT TIME SERIES
-time_series = [y_clean, y_mixed, y_noise, y_mixed - y_noise]
-titles = ['Clean voice', 'Mixed voice', 'Noise', 'Mixed voice - Noise = Clean voice']
-plot_time_series(time_series, titles)
+    # PLOT TIME SERIES
+    time_series = [y_clean, y_mixed, y_noise, y_mixed - y_noise]
+    titles = ['Clean voice', 'Mixed voice', 'Noise', 'Mixed voice - Noise = Clean voice']
+    plot_time_series(time_series, titles)
 
-''''STEPS FOR CREATING DATASET
-1. Audio files to numpy (audio_files())
-    1.1. Load .wav
-    1.2. audio to audio frame stack (audio_to_audio_frame_stack())
-    1.3. Append result from 1.2 to audio list (list_sound_array)
-2. Blend noise randomly (blend_noise_randomly())
-3. noisy_voice_long = reshape
-4. save noisy_voice_long
-5. Repeat 3. & 4. for voice_long and noise_long
-'''
+    ''''STEPS FOR CREATING DATASET
+    1. Audio files to numpy (audio_files())
+        1.1. Load .wav
+        1.2. audio to audio frame stack (audio_to_audio_frame_stack())
+        1.3. Append result from 1.2 to audio list (list_sound_array)
+    2. Blend noise randomly (blend_noise_randomly())
+    3. noisy_voice_long = reshape
+    4. save noisy_voice_long
+    5. Repeat 3. & 4. for voice_long and noise_long
+    '''
 
-# 1. Audio files to numpy
-audio_files_to_numpy(audio_dir, [clean_filename, mixed_filename, noise_filename], sample_rate, frame_length, hop_length_frame, min_duration)
+    # 1. Audio files to numpy
+    audio_dir = 'spectrogramVisualizing/All_together'
+    clean1 = 'clean.wav'
+    clean2 = 'clean2.wav'
+    y_clean1, sr_clean1 = librosa.load(os.path.join(audio_dir, clean1), sr=sample_rate)
+    y_clean2, sr_clean2 = librosa.load(os.path.join(audio_dir, clean2), sr=sample_rate)
+    print("Duration clean1: {} seconds.".format(librosa.get_duration(y=y_clean1, sr=sr_clean1)))
+    print("Duration clean2: {} seconds.".format(librosa.get_duration(y=y_clean2, sr=sr_clean2)))
 
-# 1.2 Audio to audio frame stack
-list_sound_array = []
-appending = audio_to_audio_frame_stack(y_clean, frame_length, hop_length_frame)
-print("\ny_clean \nappending.\n")
-print(y_clean)
-print(appending)
-print(y_clean.shape)
-if appending.any():
-    print(appending.shape)
-# 1.3 Append result from 1.2 to list_sound_array
-list_sound_array.append(appending)
+    clean_voice = audio_files_to_numpy(audio_dir, ['clean.wav', 'clean2.wav'], sample_rate, frame_length, hop_length_frame, min_duration)
+    noise = audio_files_to_numpy(audio_dir, ['noise.wav', 'noise2.wav'], sample_rate, frame_length, hop_length_frame, min_duration)
+    noisy = clean_voice + noise
+    print("shape of clean_voice: {}".format(clean_voice.shape))
+    print("shape of noisy: {}".format(noisy.shape))
+    print("shape of noise: {}".format(noise.shape))
+    save_audio(clean_voice.flatten(),sample_rate,"clean_long.wav")
+    save_audio(noisy.flatten(),sample_rate,"noisy_long.wav")
+    save_audio(noise.flatten(),sample_rate,"noise_long.wav")
 
+    # TODO: Dimensions of histogram
+    # TODO: create spectrograms in numpy arrays
+    # TODO: Save spectrograms on disk
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Example of saving audio
-save_audio(y_clean, sample_rate, 'mispe.wav')
+if __name__== "__main__":
+    main()
