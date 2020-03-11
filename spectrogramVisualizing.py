@@ -121,6 +121,7 @@ def numpy_audio_to_matrix_spectrogram(numpy_audio, dim_square_spec, n_fft, hop_l
         m_mag_db[i, :, :], m_phase[i, :, :] = audio_to_magnitude_db_and_phase(
             n_fft, hop_length_fft, numpy_audio[i])
 
+    print('\nShape of Spectrograms generated: {}\n'.format(m_mag_db.shape[1:]))
     return m_mag_db, m_phase
 
 
@@ -164,6 +165,13 @@ def main():
     hop_length_frame = sample_rate + 128
     n_fft = 512
     hop_length_fft = 63
+
+    path_save_spectrogram ='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/spectrogram/'
+    path_save_time_serie = '/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/time_serie'
+
+
+
+
     # Load .wav files to plot
     y_clean, sr_clean = librosa.load(os.path.join(audio_dir, clean_filename), sr=sample_rate)
     y_mixed, sr_mixed = librosa.load(os.path.join(audio_dir, mixed_filename), sr=sample_rate)
@@ -226,11 +234,11 @@ def main():
     m_amp_db_noisy_voice,  m_pha_noisy_voice = numpy_audio_to_matrix_spectrogram(
             noisy, dim_square_spec, n_fft, hop_length_fft)
 
-    '''
+
     # Save to disk for Training / QC
-    np.save(path_save_time_serie + 'voice_timeserie', prod_voice)
-    np.save(path_save_time_serie + 'noise_timeserie', prod_noise)
-    np.save(path_save_time_serie + 'noisy_voice_timeserie', prod_noisy_voice)
+    np.save(path_save_time_serie + 'voice_timeserie', clean_voice)
+    np.save(path_save_time_serie + 'noise_timeserie', noise)
+    np.save(path_save_time_serie + 'noisy_voice_timeserie', noisy)
 
 
     np.save(path_save_spectrogram + 'voice_amp_db', m_amp_db_voice)
@@ -240,7 +248,7 @@ def main():
     np.save(path_save_spectrogram + 'voice_pha_db', m_pha_voice)
     np.save(path_save_spectrogram + 'noise_pha_db', m_pha_noise)
     np.save(path_save_spectrogram + 'noisy_voice_pha_db', m_pha_noisy_voice)
-    '''
+
 
 
 
