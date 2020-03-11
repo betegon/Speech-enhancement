@@ -94,6 +94,38 @@ def audio_to_audio_frame_stack(sound_data, frame_length, hop_length_frame, inclu
     return np.vstack(sound_data_list)
 
 
+def audio_to_magnitude_db_and_phase(n_fft, hop_length_fft, audio):
+    """This function takes an audio and convert into spectrogram,
+       it returns the magnitude in dB and the phase"""
+
+    stftaudio = librosa.stft(audio, n_fft=n_fft, hop_length=hop_length_fft)
+    stftaudio_magnitude, stftaudio_phase = librosa.magphase(stftaudio)
+
+    stftaudio_magnitude_db = librosa.amplitude_to_db(
+        stftaudio_magnitude, ref=np.max)
+
+    return stftaudio_magnitude_db, stftaudio_phase
+
+
+def numpy_audio_to_matrix_spectrogram(numpy_audio, dim_square_spec, n_fft, hop_length_fft):
+    """This function takes as input a numpy audio of size (nb_frame,frame_length), and return
+    a numpy containing the matrix spectrogram for amplitude in dB and phase. It will have the size
+    (nb_frame,dim_square_spec,dim_square_spec)"""
+    print("Numpy audio size: {}".format(numpy_audio.shape))
+    nb_audio = numpy_audio.shape[0]
+
+    m_mag_db = np.zeros((nb_audio, dim_square_spec, dim_square_spec))
+    m_phase = np.zeros((nb_audio, dim_square_spec, dim_square_spec), dtype=complex)
+
+    for i in range(nb_audio):
+        m_mag_db[i, :, :], m_phase[i, :, :] = audio_to_magnitude_db_and_phase(
+            n_fft, hop_length_fft, numpy_audio[i])
+
+    return m_mag_db, m_phase
+
+
+
+
 def save_audio(y, sample_rate, output_name='audio_ouput.wav'):
     '''
     Save audio file given y (amplitude values) and sample_rate.
@@ -127,15 +159,15 @@ def main():
     mixed_filename = 'mixed.wav'
     noise_filename = 'noise.wav'
     sample_rate = 16000  # Hz
-    frame_length = sample_rate + 64  # a bit more than sample_rate for avoiding overlapping.
+    frame_length = sample_rate + 128  # a bit more than sample_rate for avoiding overlapping.
     min_duration = 1  # Seconds
-    hop_length_frame = sample_rate + 64
-
+    hop_length_frame = sample_rate + 128
+    n_fft = 512
+    hop_length_fft = 63
     # Load .wav files to plot
     y_clean, sr_clean = librosa.load(os.path.join(audio_dir, clean_filename), sr=sample_rate)
     y_mixed, sr_mixed = librosa.load(os.path.join(audio_dir, mixed_filename), sr=sample_rate)
     y_noise, sr_noise = librosa.load(os.path.join(audio_dir, noise_filename), sr=sample_rate)
-
     # Total duration = y/sr
     print("Duration clean: {} seconds.".format(librosa.get_duration(y=y_clean, sr=sr_clean)))
     print("Duration mixed: {} seconds.".format(librosa.get_duration(y=y_mixed, sr=sr_mixed)))
@@ -166,6 +198,7 @@ def main():
     print("Duration clean1: {} seconds.".format(librosa.get_duration(y=y_clean1, sr=sr_clean1)))
     print("Duration clean2: {} seconds.".format(librosa.get_duration(y=y_clean2, sr=sr_clean2)))
 
+    # [START] AUDIO FILES TO NUMPY + SAVE LONG WAVES
     clean_voice = audio_files_to_numpy(audio_dir, ['clean.wav', 'clean2.wav'], sample_rate, frame_length, hop_length_frame, min_duration)
     noise = audio_files_to_numpy(audio_dir, ['noise.wav', 'noise2.wav'], sample_rate, frame_length, hop_length_frame, min_duration)
     noisy = clean_voice + noise
@@ -175,6 +208,43 @@ def main():
     save_audio(clean_voice.flatten(),sample_rate,"clean_long.wav")
     save_audio(noisy.flatten(),sample_rate,"noisy_long.wav")
     save_audio(noise.flatten(),sample_rate,"noise_long.wav")
+    # [END] AUDIO FILES TO NUMPY + SAVE LONG WAVES
+
+
+
+
+
+
+    # Squared spectrogram dimensions
+    dim_square_spec = int(n_fft / 2) + 1
+
+    # Create Amplitude and phase of the sounds
+    m_amp_db_voice,  m_pha_voice = numpy_audio_to_matrix_spectrogram(
+            clean_voice, dim_square_spec, n_fft, hop_length_fft)
+    m_amp_db_noise,  m_pha_noise = numpy_audio_to_matrix_spectrogram(
+            noise, dim_square_spec, n_fft, hop_length_fft)
+    m_amp_db_noisy_voice,  m_pha_noisy_voice = numpy_audio_to_matrix_spectrogram(
+            noisy, dim_square_spec, n_fft, hop_length_fft)
+
+    '''
+    # Save to disk for Training / QC
+    np.save(path_save_time_serie + 'voice_timeserie', prod_voice)
+    np.save(path_save_time_serie + 'noise_timeserie', prod_noise)
+    np.save(path_save_time_serie + 'noisy_voice_timeserie', prod_noisy_voice)
+
+
+    np.save(path_save_spectrogram + 'voice_amp_db', m_amp_db_voice)
+    np.save(path_save_spectrogram + 'noise_amp_db', m_amp_db_noise)
+    np.save(path_save_spectrogram + 'noisy_voice_amp_db', m_amp_db_noisy_voice)
+
+    np.save(path_save_spectrogram + 'voice_pha_db', m_pha_voice)
+    np.save(path_save_spectrogram + 'noise_pha_db', m_pha_noise)
+    np.save(path_save_spectrogram + 'noisy_voice_pha_db', m_pha_noisy_voice)
+    '''
+
+
+
+
 
     # TODO: Dimensions of histogram
     # TODO: create spectrograms in numpy arrays
