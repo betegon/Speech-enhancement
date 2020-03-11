@@ -46,7 +46,23 @@ parser.add_argument('--frame_length', default=8064, type=int)
 parser.add_argument('--hop_length_frame', default=8064, type=int)
 # hop length for noise files to blend (noise is splitted into several windows)
 parser.add_argument('--hop_length_frame_noise', default=5000, type=int)
-# Choosing n_fft and hop_length_fft to have squared spectrograms
+
+
+# Info extracted from librosa.core.stft
+'''Choosing n_fft and hop_length_fft to have squared spectrograms
+
+n_fft:int > 0 [scalar]
+length of the windowed signal after padding with zeros. The number of rows in the STFT matrix D is (1 + n_fft/2).
+The default value, n_fft=2048 samples, corresponds to a physical duration of 93 milliseconds at a sample rate of 22050 Hz,
+    i.e. the default sample rate in librosa. This value is well adapted for music signals.
+However, in speech processing, the recommended value is 512, corresponding to 23 milliseconds at a sample rate of 22050 Hz.
+In any case, we recommend setting n_fft to a power of two for optimizing the speed of the fast Fourier transform (FFT) algorithm.
+
+hop_length:int > 0 [scalar]
+number of audio samples between adjacent STFT columns.
+Smaller values increase the number of columns in D without affecting the frequency resolution of the STFT.
+If unspecified, defaults to win_length / 4 (see below).
+'''
 parser.add_argument('--n_fft', default=255, type=int)
 
 parser.add_argument('--hop_length_fft', default=63, type=int)
