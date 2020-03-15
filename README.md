@@ -8,10 +8,10 @@
 
 ## TODO
 
-1. Move `spectrogramVisualizing` functions to where they belong, as they has been updated.
+1. Move `spectrogramVisualizing.py` functions to where they belong, as they has been updated.
 2. Check if moving the functions (1.) it will add automatically the padding for inference audio. If not, create a function to add padding to inference (otherwise, the last block of STFT will be incomplete and therefore not processed, so audio will be shorter after inference).
 3. Document how to create dataset from 28spk and 56spk
-
+4. Improve performance of creating dataset, `spectrogramVisualizing.py`, as it is so slow. (parallelism?)
 ## STEPS FOLLOWED BY ME (@betegon)
 
 1. `conda create -n SpeechEnhancement` # this will create a python 3.7.4 environment
