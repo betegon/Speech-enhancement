@@ -63,9 +63,19 @@ I let nb_samples=50 by default for the demo but for production I would recommend
 
 Then run `python main.py --mode='data_creation'`. This will randomly blend some clean voices from `voice_dir` with some noises from `noise_dir` and save the spectrograms of noisy voices, noises and clean voices to disk as well as complex phases, time series and sounds (for QC or to test other networks). It takes the inputs parameters defined in `args.py`. Parameters for STFT, frame length, hop_length can be modified in `args.py` (or pass it as arguments from the terminal), but with the default parameters each window will be converted into spectrogram matrix of size 128 x 128.
 
-Datasets to be used for training will be magnitude spectrograms of noisy voices and magnitude spectrograms of clean voices.
+**Datasets to be used for training will be magnitude spectrograms of noisy voices and magnitude spectrograms of clean voices.**
 
+If you are going to run this on a Linux/macOS machine, be sure that your system is able to allocate arrays with shapes desireed. Meaning that you should change your file `/proc/sys/vm/overcommit_memory`, [1] from **References (betegon)**
+1. Open terminal and check `overcommit_memmory`:
 
+   ```bash
+   cat /proc/sys/vm/overcommit_memory
+   ```
+2. If value is 0, change it to 1. *Check [1] from **References (betegon)** for more information*
+
+   ```bash
+   sudo sh -c "/usr/bin/echo 1 > /proc/sys/vm/overcommit_memory"
+   ```
 ## Training
 
 The model used for the training is a U-Net, a Deep Convolutional Autoencoder with symmetric skip connections. [U-Net](https://arxiv.org/abs/1505.04597) was initially developed for Bio Medical Image Segmentation. Here the U-Net has been adapted to denoise spectrograms.
@@ -186,6 +196,9 @@ Below some examples:
 ```
 
 Have a look at possible arguments for each option in `args.py`.
+
+## References (betegon)
+[1] [https://stackoverflow.com/questions/57507832/unable-to-allocate-array-with-shape-and-data-type](https://stackoverflow.com/questions/57507832/unable-to-allocate-array-with-shape-and-data-type)
 
 ## References
 
