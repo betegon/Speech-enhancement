@@ -8,7 +8,7 @@
 
 ## TODO
 
-1. Argument in args to specify the type of input data. In my case, for 16000Hz sampling, I needed a 256x256 size, so I have to hardcode it into model_unet.py
+1. Create a new argument in `args.py` to specify the type of input data. In my case, for 16000Hz sampling, I needed a 256x256 size, so I have to hardcode it into model_unet.py
 2. Move `spectrogramVisualizing.py` functions to where they belong, as they has been updated.
 3. Check if moving the functions (1.) it will add automatically the padding for inference audio. If not, create a function to add padding to inference (otherwise, the last block of STFT will be incomplete and therefore not processed, so audio will be shorter after inference).
 4. Document how to create dataset from 28spk and 56spk !!! (put it on custom training section)
