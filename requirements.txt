@@ -1,4 +1,5 @@
 pytest
+progress
 tensorflow==1.15.2
 librosa
 matplotlib
