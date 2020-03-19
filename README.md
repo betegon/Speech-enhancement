@@ -11,14 +11,50 @@
 1. Argument in args to specify the type of input data. In my case, for 16000Hz sampling, I needed a 256x256 size, so I have to hardcode it into model_unet.py
 2. Move `spectrogramVisualizing.py` functions to where they belong, as they has been updated.
 3. Check if moving the functions (1.) it will add automatically the padding for inference audio. If not, create a function to add padding to inference (otherwise, the last block of STFT will be incomplete and therefore not processed, so audio will be shorter after inference).
-4. Document how to create dataset from 28spk and 56spk
+4. Document how to create dataset from 28spk and 56spk !!! (put it on custom training section)
 5. Improve performance of creating dataset, `spectrogramVisualizing.py`, as it is so slow. (parallelism?)
 ## STEPS FOLLOWED BY ME (@betegon)
 
-1. `conda create -n SpeechEnhancement` # this will create a python 3.7.4 environment
-2. `pip install -r requirements.txt`
-3. modify the file to denoise in args.py
+ ### INSTALLATION
+
+1. Create a new conda environment (python 3.7, as Tensorflow-gpu 1.x does not support python 3.8):
+
+   ```bash
+   conda create -n SpeechEnhancement python=3.7 
+   ```
+
+    
+
+2. Activate environment:
+
+   ```bash
+   conda activate SpeechEnhancement
+   ```
+
+   
+
+3. Install requirements:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   
+
+### INFERENCE 
+
+It is possible to do inference with provided weights. If you want to do inference with other weights, the weights should be called `model_unet.h5` and placed in `weights/`
+
+1. Modify the audio file you want to denoise in `args.py`
+2. run `python main.py --mode prediction`
+
+### TRAINING
+
+1. Create your dataset (TO-DO: To be documented)
+2. run `python main.py --mode training`
+
 ## Introduction
+
 **This project aims at building a speech enhancement system to attenuate environmental noise.**
 
 <img src="img/denoise_10classes.gif" alt="Spectrogram denoising" title="Speech enhancement"/>
@@ -223,4 +259,4 @@ Have a look at possible arguments for each option in `args.py`.
 
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
-- **[MIT license](http://opensource.org/licenses/mit-license.php)**
+- **[MIT license](http://opensource.org/licenses/mit-license.php)**º
