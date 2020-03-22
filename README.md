@@ -8,16 +8,53 @@
 
 ## TODO
 
-1. Move `spectrogramVisualizing` functions to where they belong, as they has been updated.
-2. Check if moving the functions (1.) it will add automatically the padding for inference audio. If not, create a function to add padding to inference (otherwise, the last block of STFT will be incomplete and therefore not processed, so audio will be shorter after inference).
-3. Document how to create dataset from 28spk and 56spk
-
+1. Create a new argument in `args.py` to specify the type of input data. In my case, for 16000Hz sampling, I needed a 256x256 size, so I have to hardcode it into model_unet.py
+2. Move `spectrogramVisualizing.py` functions to where they belong, as they has been updated.
+3. Check if moving the functions (1.) it will add automatically the padding for inference audio. If not, create a function to add padding to inference (otherwise, the last block of STFT will be incomplete and therefore not processed, so audio will be shorter after inference).
+4. Document how to create dataset from 28spk and 56spk !!! (put it on custom training section)
+5. Improve performance of creating dataset, `spectrogramVisualizing.py`, as it is so slow. (parallelism?)
 ## STEPS FOLLOWED BY ME (@betegon)
 
-1. `conda create -n SpeechEnhancement` # this will create a python 3.7.4 environment
-2. `pip install -r requirements.txt`
-3. modify the file to denoise in args.py
+ ### INSTALLATION
+
+1. Create a new conda environment (python 3.7, as Tensorflow-gpu 1.x does not support python 3.8):
+
+   ```bash
+   conda create -n SpeechEnhancement python=3.7 
+   ```
+
+    
+
+2. Activate environment:
+
+   ```bash
+   conda activate SpeechEnhancement
+   ```
+
+   
+
+3. Install requirements:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   
+
+### INFERENCE 
+
+It is possible to do inference with provided weights. If you want to do inference with other weights, the weights should be called `model_unet.h5` and placed in `weights/`
+
+1. Modify the audio file you want to denoise in `args.py`
+2. run `python main.py --mode prediction`
+
+### TRAINING
+
+1. Create your dataset (TO-DO: To be documented)
+2. run `python main.py --mode training`
+
 ## Introduction
+
 **This project aims at building a speech enhancement system to attenuate environmental noise.**
 
 <img src="img/denoise_10classes.gif" alt="Spectrogram denoising" title="Speech enhancement"/>
@@ -63,9 +100,19 @@ I let nb_samples=50 by default for the demo but for production I would recommend
 
 Then run `python main.py --mode='data_creation'`. This will randomly blend some clean voices from `voice_dir` with some noises from `noise_dir` and save the spectrograms of noisy voices, noises and clean voices to disk as well as complex phases, time series and sounds (for QC or to test other networks). It takes the inputs parameters defined in `args.py`. Parameters for STFT, frame length, hop_length can be modified in `args.py` (or pass it as arguments from the terminal), but with the default parameters each window will be converted into spectrogram matrix of size 128 x 128.
 
-Datasets to be used for training will be magnitude spectrograms of noisy voices and magnitude spectrograms of clean voices.
+**Datasets to be used for training will be magnitude spectrograms of noisy voices and magnitude spectrograms of clean voices.**
 
+If you are going to run this on a Linux/macOS machine, be sure that your system is able to allocate arrays with shapes desireed. Meaning that you should change your file `/proc/sys/vm/overcommit_memory`, [1] from **References (betegon)**
+1. Open terminal and check `overcommit_memmory`:
 
+   ```bash
+   cat /proc/sys/vm/overcommit_memory
+   ```
+2. If value is 0, change it to 1. *Check [1] from **References (betegon)** for more information*
+
+   ```bash
+   sudo sh -c "/usr/bin/echo 1 > /proc/sys/vm/overcommit_memory"
+   ```
 ## Training
 
 The model used for the training is a U-Net, a Deep Convolutional Autoencoder with symmetric skip connections. [U-Net](https://arxiv.org/abs/1505.04597) was initially developed for Bio Medical Image Segmentation. Here the U-Net has been adapted to denoise spectrograms.
@@ -187,6 +234,9 @@ Below some examples:
 
 Have a look at possible arguments for each option in `args.py`.
 
+## References (betegon)
+[1] [https://stackoverflow.com/questions/57507832/unable-to-allocate-array-with-shape-and-data-type](https://stackoverflow.com/questions/57507832/unable-to-allocate-array-with-shape-and-data-type)
+
 ## References
 
 >Jansson, Andreas, Eric J. Humphrey, Nicola Montecchio, Rachel M. Bittner, Aparna Kumar and Tillman Weyde.**Singing Voice Separation with Deep U-Net Convolutional Networks.** *ISMIR* (2017).
@@ -209,4 +259,4 @@ Have a look at possible arguments for each option in `args.py`.
 
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
-- **[MIT license](http://opensource.org/licenses/mit-license.php)**
+- **[MIT license](http://opensource.org/licenses/mit-license.php)**º
