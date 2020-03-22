@@ -5,25 +5,25 @@ parser = argparse.ArgumentParser(description='Speech enhancement,data creation, 
 #mode to run the program (options: data creation, training or prediction)
 parser.add_argument('--mode',default='prediction', type=str, choices=['data_creation', 'training', 'prediction'])
 #folders where to find noise audios and clean voice audio to prepare training dataset (mode data_creation)
-parser.add_argument('--noise_dir', default='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/noise/', type=str)
+parser.add_argument('--noise_dir', default='Train/noise/', type=str)
 
-parser.add_argument('--voice_dir', default='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/clean_voice/', type=str)
+parser.add_argument('--voice_dir', default='Train/clean_voice/', type=str)
 #folders where to save spectrograms, time series and sounds for training / QC
-parser.add_argument('--path_save_spectrogram', default='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/spectrogram/', type=str)
+parser.add_argument('--path_save_spectrogram', default='Train/spectrogram/', type=str)
 
-parser.add_argument('--path_save_time_serie', default='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/time_serie', type=str)
+parser.add_argument('--path_save_time_serie', default='Train/time_serie', type=str)
 
-parser.add_argument('--path_save_sound', default='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/sound', type=str)
+parser.add_argument('--path_save_sound', default='Train/sound', type=str)
 # How many frames to create in data_creation mode.
 # Each window (will be converted to 2D spectrogram) and will be a sample for training.
 # nb_samples is simply the number of windows used.
 parser.add_argument('--nb_samples', default=1, type=int)
 #Training from scratch or pre-trained weights
-parser.add_argument('--training_from_scratch',default=True, type=bool)
+parser.add_argument('--training_from_scratch',default=True, type=bool) # CHANGE THIS TO FALSE TO TRAIN FROM WEIGHTS IN weights/model_unet.h5
 #folder of saved weights
-parser.add_argument('--weights_folder', default='./weights', type=str)
+parser.add_argument('--weights_folder', default='weights', type=str)
 #Nb of epochs for training
-parser.add_argument('--epochs', default=10, type=int)
+parser.add_argument('--epochs', default=500, type=int)
 #Batch size for training
 parser.add_argument('--batch_size', default=20, type=int)
 #Name of saved model to read
@@ -47,7 +47,9 @@ parser.add_argument('--hop_length_frame', default=8064, type=int)
 # hop length for noise files to blend (noise is splitted into several windows)
 parser.add_argument('--hop_length_frame_noise', default=5000, type=int)
 
+parser.add_argument('--n_fft', default=255, type=int)
 
+parser.add_argument('--hop_length_fft', default=63, type=int)
 # Info extracted from librosa.core.stft
 '''Choosing n_fft and hop_length_fft to have squared spectrograms
 
@@ -63,6 +65,3 @@ number of audio samples between adjacent STFT columns.
 Smaller values increase the number of columns in D without affecting the frequency resolution of the STFT.
 If unspecified, defaults to win_length / 4 (see below).
 '''
-parser.add_argument('--n_fft', default=255, type=int)
-
-parser.add_argument('--hop_length_fft', default=63, type=int)

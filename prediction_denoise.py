@@ -3,8 +3,10 @@ import tensorflow as tf
 from tensorflow.keras.models import model_from_json
 from data_tools import scaled_in, inv_scaled_ou
 from data_tools import audio_files_to_numpy, numpy_audio_to_matrix_spectrogram, matrix_spectrogram_to_numpy_audio
-
-
+'''
+    EEEEH, POR AQUI HAY QUE PONER LO DEL ZERO PADDING QUE TENGO HECHO EN SPECTROGRAM VISUALIZING, PARA QUE NO SE ME COMA NINGUN SEGUNDO FINAL
+    CUANDO SE PASA EL AUDIO POR LA RED
+'''
 def prediction(weights_path, name_model, audio_dir_prediction, dir_save_prediction, audio_input_prediction,
 audio_output_prediction, sample_rate, min_duration, frame_length, hop_length_frame, n_fft, hop_length_fft):
     """ This function takes as input pretrained weights, noisy voice sound to denoise, predict
