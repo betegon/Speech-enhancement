@@ -19,21 +19,21 @@ parser.add_argument('--path_save_sound', default='Train/sound', type=str)
 # nb_samples is simply the number of windows used.
 parser.add_argument('--nb_samples', default=1, type=int)
 #Training from scratch or pre-trained weights
-parser.add_argument('--training_from_scratch',default=True, type=bool) # CHANGE THIS TO FALSE TO TRAIN FROM WEIGHTS IN weights/model_unet.h5
+parser.add_argument('--training_from_scratch',default=False, type=bool) # CHANGE THIS TO FALSE TO TRAIN FROM WEIGHTS IN weights/model_unet.h5
 #folder of saved weights
 parser.add_argument('--weights_folder', default='weights', type=str)
 #Nb of epochs for training
-parser.add_argument('--epochs', default=500, type=int)
+parser.add_argument('--epochs', default=200, type=int)
 #Batch size for training
-parser.add_argument('--batch_size', default=20, type=int)
+parser.add_argument('--batch_size', default=100, type=int)
 #Name of saved model to read
-parser.add_argument('--name_model', default='model_unet', type=str)
+parser.add_argument('--name_model', default='model_best_100ypicoEPOCHS_mas_44_epocas_mas_con_batch100_vallos0_0496', type=str)
 #directory where read noisy sound to denoise (prediction mode)
 parser.add_argument('--audio_dir_prediction', default='./demo_data/test', type=str)
 #directory to save the denoise sound (prediction mode)
 parser.add_argument('--dir_save_prediction', default='./demo_data/save_predictions/', type=str)
 #Noisy sound file to denoise (prediction mode)
-parser.add_argument('--audio_input_prediction', default=['sp26_babble_sn15.wav'], type=list)
+parser.add_argument('--audio_input_prediction', default=['mixed7.wav'], type=list)
 #File name of sound output of denoise prediction
 parser.add_argument('--audio_output_prediction', default='denoise_t2.wav', type=str)
 # Sample rate chosen to read audio

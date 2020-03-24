@@ -1,8 +1,11 @@
+import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow import Session, ConfigProto
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
+from tensorflow.keras.backend import set_session
 from model_unet import unet
 from data_tools import scaled_in, scaled_ou
 
@@ -44,20 +47,31 @@ def training(path_save_spectrogram, weights_path, name_model, training_from_scra
 
     #If training from scratch
     if training_from_scratch:
-
+        print("\nTraining from scratch\n.")
         generator_nn=unet()
     #If training from pre-trained weights
     else:
+        pretrained_weights = "{}/{}.h5".format(weights_path, name_model)
+        print("\nTraining from pre-trained weights: {}\n".format(pretrained_weights))
+        generator_nn = unet(pretrained_weights=pretrained_weights)
 
-        generator_nn=unet(pretrained_weights = weights_path+name_model+'.h5')
+    # Save model each epoch, just in in case
+    weights_name_each="model_and_weights-{epoch:02d}.h5"
 
+    checkpoint_each = ModelCheckpoint(weights_path+ weights_name_each, monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
     #Save best models to disk during training
-    checkpoint = ModelCheckpoint(weights_path+'/model_best.h5', verbose=1, monitor='val_loss',save_best_only=True, mode='auto')
+    weights_name_best="model_and_weights-{epoch:02d}-{val_loss:.2f}.h5"
+    checkpoint_best = ModelCheckpoint(weights_path+weights_name_best, verbose=1, monitor='val_loss', save_weights_only=False, save_best_only=True, mode='auto')
+
+    # TensorBoard callback
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1, write_images=True, )
+
 
     generator_nn.summary()
     #Training
-    history = generator_nn.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, shuffle=True, callbacks=[checkpoint], verbose=1, validation_data=(X_test, y_test))
+    history = generator_nn.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, shuffle=True, callbacks=[checkpoint_each, checkpoint_best, tensorboard_callback], verbose=1, validation_data=(X_test, y_test))
 
     #Plot training and validation loss (log scale)
     loss = history.history['loss']

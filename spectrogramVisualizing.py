@@ -112,13 +112,31 @@ def audio_to_audio_frame_stack(sound_data, frame_length, hop_length_frame, inclu
 def audio_to_magnitude_db_and_phase(n_fft, hop_length_fft, audio):
     """This function takes an audio and convert into spectrogram,
        it returns the magnitude in dB and the phase"""
+    '''
+    print("\naudio")
+    print(audio)
+    print(audio.shape)
 
+    print("n_fft")
+    print(n_fft)
+
+    print("hop_length_fft")
+    print(hop_length_fft)
+    '''
     stftaudio = librosa.stft(audio, n_fft=n_fft, hop_length=hop_length_fft)
     stftaudio_magnitude, stftaudio_phase = librosa.magphase(stftaudio)
-
+    '''
+    print("stftaudio")
+    print(stftaudio)
+    print(stftaudio.shape)
+    '''
     stftaudio_magnitude_db = librosa.amplitude_to_db(
         stftaudio_magnitude, ref=np.max)
-
+    '''
+    print("stftaudio magnitude and phase shapes: ")
+    print(stftaudio_magnitude_db.shape)
+    print(stftaudio_phase.shape)
+    '''
     return stftaudio_magnitude_db, stftaudio_phase
 
 
@@ -126,9 +144,7 @@ def numpy_audio_to_matrix_spectrogram(numpy_audio, dim_square_spec, n_fft, hop_l
     """This function takes as input a numpy audio of size (nb_frame,frame_length), and return
     a numpy containing the matrix spectrogram for amplitude in dB and phase. It will have the size
     (nb_frame,dim_square_spec,dim_square_spec)"""
-    print("Numpy audio size: {}".format(numpy_audio.shape))
     nb_audio = numpy_audio.shape[0]
-
     m_mag_db = np.zeros((nb_audio, dim_square_spec, dim_square_spec))
     m_phase = np.zeros((nb_audio, dim_square_spec, dim_square_spec), dtype=complex)
 
@@ -170,26 +186,19 @@ def plot_time_series(time_series_list, time_series_titles):
 
 
 
-
-
-
-
-
 def main():
     audio_dir = 'spectrogramVisualizing/medium'
-    clean_filename = 'clean.wav'
-    mixed_filename = 'mixed.wav'
-    noise_filename = 'noise.wav'
-    sample_rate = 16000  # Hz
-    frame_length = sample_rate + 128  # a bit more than sample_rate for avoiding overlapping.
+    sample_rate = 8000  # Hz
+    frame_length = sample_rate + 64  # a bit more than sample_rate for avoiding overlapping.
     min_duration = 1  # Seconds
-    hop_length_frame = sample_rate + 128
-    n_fft = 512
+    hop_length_frame = sample_rate + 64
+    n_fft = 255
     hop_length_fft = 63
 
-    path_save_spectrogram   ='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/spectrogram'
-    path_save_time_serie    = '/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/time_serie'
-    path_save_sound         ='/home/betegon/Desktop/DENOISER/example/Speech-enhancement/Train/sound'
+
+    path_save_spectrogram   = 'Train/spectrogram/'
+    path_save_time_serie    = 'Train/time_serie/'
+    path_save_sound         = 'Train/sound/'
     path_train = "Train/finished_28spk_para_example/"
 
 
@@ -218,47 +227,79 @@ def main():
     # noise_list = [os.path.basename(x) for x in sorted(glob.glob("{}/noise*".format(audio_dir)))]
     # print(clean_list)
     # print(noise_list)
-    clean_voice = audio_files_to_numpy(audio_dir,clean_list[:300], sample_rate, frame_length, hop_length_frame, min_duration)
-    noise = audio_files_to_numpy(audio_dir, noise_list[:300], sample_rate, frame_length, hop_length_frame, min_duration)
-    noisy = clean_voice + noise
-    print("shape of clean_voice: {}".format(clean_voice.shape))
-    print("shape of noisy: {}".format(noisy.shape))
-    print("shape of noise: {}".format(noise.shape))
-    save_audio(clean_voice.flatten(),sample_rate,"clean_long.wav")
-    save_audio(noisy.flatten(),sample_rate,"noisy_long.wav")
-    save_audio(noise.flatten(),sample_rate,"noise_long.wav")
-    # [END] AUDIO FILES TO NUMPY + SAVE LONG WAVES
-
-
-
-
-
 
     # Squared spectrogram dimensions
     dim_square_spec = int(n_fft / 2) + 1
 
+    # CLEAN VOICE
+    clean_voice = audio_files_to_numpy(audio_dir, clean_list[6000:], sample_rate, frame_length, hop_length_frame, min_duration)
+    save_audio(clean_voice.flatten(), sample_rate, "clean_long.wav")
+    # Save to disk for Training / QC
+    np.save(path_save_time_serie + 'voice_timeserie', clean_voice)
     # Create Amplitude and phase of the sounds
     m_amp_db_voice,  m_pha_voice = numpy_audio_to_matrix_spectrogram(
             clean_voice, dim_square_spec, n_fft, hop_length_fft)
+    np.save(path_save_spectrogram + 'voice_amp_db', m_amp_db_voice)
+    np.save(path_save_spectrogram + 'voice_pha_db', m_pha_voice)
+
+
+
+    # NOISE
+    noise = audio_files_to_numpy(audio_dir, noise_list[6000:], sample_rate, frame_length, hop_length_frame, min_duration)
+    save_audio(noise.flatten(), sample_rate, "noise_long.wav")
+    # Save to disk for Training / QC
+    np.save(path_save_time_serie + 'noise_timeserie', noise)
+    # Create Amplitude and phase of the sounds
     m_amp_db_noise,  m_pha_noise = numpy_audio_to_matrix_spectrogram(
             noise, dim_square_spec, n_fft, hop_length_fft)
+    np.save(path_save_spectrogram + 'noise_amp_db', m_amp_db_noise)
+    np.save(path_save_spectrogram + 'noise_pha_db', m_pha_noise)
+
+
+    # NOISY FILE
+    noisy = clean_voice + noise
+    print("shape of clean_voice: {}".format(clean_voice.shape))
+    print("shape of noisy: {}".format(noisy.shape))
+    print("shape of noise: {}".format(noise.shape))
+    print("\n\n NaN in CLEAN: {}\n\n".format(np.isnan(clean_voice).any()))
+    print("\n\n NaN in NOISE: {}\n\n".format(np.isnan(noise).any()))
+    print("\n\n NaN in NOISY: {}\n\n".format(np.isnan(noisy).any()))
+
+    if np.isnan(clean_voice).any():
+        print(np.argwhere(np.isnan(clean_voice)))
+    if np.isnan(noise).any():
+        print(np.argwhere(np.isnan(noise)))
+    if np.isnan(noisy).any():
+        print(np.argwhere(np.isnan(noisy)))
+    save_audio(noisy.flatten(), sample_rate, "noisy_long.wav")
+    # Save to disk for Training / QC
+    np.save(path_save_time_serie + 'noisy_voice_timeserie', noisy)
+    # Create Amplitude and phase of the sounds
     m_amp_db_noisy_voice,  m_pha_noisy_voice = numpy_audio_to_matrix_spectrogram(
             noisy, dim_square_spec, n_fft, hop_length_fft)
-
-
-    # Save to disk for Training / QC
-    np.save(path_save_time_serie + 'voice_timeserie', clean_voice)
-    np.save(path_save_time_serie + 'noise_timeserie', noise)
-    np.save(path_save_time_serie + 'noisy_voice_timeserie', noisy)
-
-
-    np.save(path_save_spectrogram + 'voice_amp_db', m_amp_db_voice)
-    np.save(path_save_spectrogram + 'noise_amp_db', m_amp_db_noise)
     np.save(path_save_spectrogram + 'noisy_voice_amp_db', m_amp_db_noisy_voice)
-
-    np.save(path_save_spectrogram + 'voice_pha_db', m_pha_voice)
-    np.save(path_save_spectrogram + 'noise_pha_db', m_pha_noise)
     np.save(path_save_spectrogram + 'noisy_voice_pha_db', m_pha_noisy_voice)
+
+
+    print("shape of clean_voice: {}".format(clean_voice.shape))
+    print("shape of noisy: {}".format(noisy.shape))
+    print("shape of noise: {}".format(noise.shape))
+    # [END] AUDIO FILES TO NUMPY + SAVE LONG WAVES
+
+
+    '''
+    # Display a spectrogram
+
+    import matplotlib.pyplot as plt
+    librosa.display.specshow(librosa.amplitude_to_db(D,ref=np.max), y_axis='log', x_axis='time')
+    plt.title('Power spectrogram')
+    plt.colorbar(format='%+2.0f dB')
+    plt.tight_layout()
+    plt.show()
+    '''
+
+
+
 
 
 
@@ -271,3 +312,36 @@ def main():
 
 if __name__== "__main__":
     main()
+
+
+
+'''
+NAN VALUES OF NOISY
+[[10856  6347]
+ [10856  6402]
+ [10856  6403]
+ [10856  6414]
+ [10856  6415]
+ [10856  6474]
+ [10856  6475]
+ [10856  6486]
+ [10856  6487]
+ [10856  6526]
+ [10856  6527]
+ [10856  6538]
+ [10856  6539]
+ [10856  6550]
+ [10856  6551]
+ [10856  6562]
+ [10856  6563]
+ [10856  6854]
+ [10856  6855]
+ [12471  1800]
+ [12471  2124]
+ [12471  2125]
+ [12471  2132]
+ [12677  3318]
+ [12677  3319]
+ [13421  2945]]
+
+'''
